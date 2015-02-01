@@ -1,0 +1,65 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+
+<html 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+>
+
+	<head>
+		<title>La Dimension Fantastique - Réassortiment</title>
+		
+		<link th:replace="util/import :: head">
+		<link rel="stylesheet" type="text/css" th:href="@{/css/purchase/restocking/restocking.css}" />
+	</head>
+	
+	<body >
+		<div th:include="util/menu :: menu"></div>
+		
+		<div class="container text-center" ng-app="KubikRestocking" ng-controller="KubikRestockingController as view">
+			<h1>Réassortiment</h1>
+			
+			<table class="panel panel-default table table-striped table-condensed">
+				<thead class="panel-heading">
+					<tr>
+						<th>Produit</th>
+						<th>Qté vendu</th>
+					</tr>
+				</thead>
+				
+				<tbody>
+					<tr ng-repeat="restock in restocks">
+						<td>
+							<a href="#" ng-click="kubikProductCard.openCard(detail.product)">
+								{{restock.product.ean13}} - {{restock.product.standardLabel}}
+							</a>
+						</td>
+						<td>{{restock.quantityToReceive}}</td>
+						<td>
+							<input 
+								id="restock-{{restock.id}}"
+								ng-model="restock.quantity"
+								ng-keyup="quantityChanged($event)"
+								class="quantity" 
+								type="number"
+								min="1" 
+								max="99999" 
+							/>
+						</td>
+					</tr>
+					
+					<tr ng-if="restocks.length == 0">
+						<td colspan="3">
+							Aucun produit à réassortir.
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="product-card"></div>
+		
+		<script th:replace="util/import :: scripts"></script>
+		
+		<script type="text/javascript" th:src="@{/js/restocking/restocking.js}"></script>
+	</body>
+</html>
