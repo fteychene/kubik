@@ -9,6 +9,8 @@ import com.cspinformatique.kubik.model.product.Category;
 
 public interface CategoryService {
 
+	void delete(int category);
+	
 	List<Category> findAll();
 	
 	Page<Category> findAll(Pageable pageable);
