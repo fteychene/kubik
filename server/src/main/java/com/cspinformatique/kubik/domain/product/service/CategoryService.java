@@ -9,7 +9,7 @@ import com.cspinformatique.kubik.model.product.Category;
 
 public interface CategoryService {
 
-	void delete(int id);
+	void delete(Category category);
 
 	void deleteProductCategories(Category category);
 
@@ -17,11 +17,17 @@ public interface CategoryService {
 
 	Page<Category> findAll(Pageable pageable);
 
+	List<Category> findByParentCategory(Category category);
+
 	List<Category> findByRootCategory(boolean rootCategory);
 
 	Category findOne(int id);
 
 	String generateNewName();
+	
+	void resetBroadleafId(int categoryId);
 
 	Category save(Category category);
+
+	Category save(Category category, boolean skipBroadleafNotification);
 }

@@ -18,23 +18,17 @@ window.KubikProductCategories.prototype.init = function(){
 
 	this.app.controller("KubikProductCategoriesController", function($scope, $http, $timeout){		
 		$scope.addCategory = function(parentCategory){
-			if(parentCategory.childCategories == undefined){
-				parentCategory.childCategories = [];
-			}
-			
 			$http.get(kubikProductCategories.categoriesUrl + "?newName").success(function(name){
-				parentCategory.childCategories.push({name : name, rootCategory : false});
-				$http.post(kubikProductCategories.categoriesUrl, parentCategory).success(function(category){
-					$scope.loadCategories();
-				});
-			});
-		};
-		
-		$scope.addRootCategory = function(){
-			$http.get(kubikProductCategories.categoriesUrl + "?newName").success(function(name){
-				$http.post(kubikProductCategories.categoriesUrl, {name : name, rootCategory : true}).success(function(category){
-					$scope.loadCategories();
-				});
+				var newCategory = {name : name};
+				
+				if(parentCategory != undefined){
+					newCategory.parentCategory = { id : parentCategory.id};
+					newCategory.rootCategory = false;
+				}else{
+					newCategory.rootCategory = true;
+				}
+				
+				$scope.saveCategory(newCategory);
 			});
 		}
 		
@@ -82,7 +76,7 @@ window.KubikProductCategories.prototype.init = function(){
 			var parentCategory = $scope.childParentCategoriesMap[category.id];
 			
 			$http.delete(kubikProductCategories.categoriesUrl + "/" + category.id + "/product").success(function(){
-				if(category.rootCategory){
+//				if(category.rootCategory){
 					$http.delete(kubikProductCategories.categoriesUrl + "/" + category.id).success(function(){
 						$(".confirm-delete-category-modal").modal("hide");
 						
@@ -92,19 +86,19 @@ window.KubikProductCategories.prototype.init = function(){
 					}).finally(function(){
 						$scope.loading = false;
 					});
-				}else{
-					parentCategory.childCategories.splice(parentCategory.childCategories.indexOf(category), 1);
-					
-					$http.post(kubikProductCategories.categoriesUrl, parentCategory).success(function(){
-						$(".confirm-delete-category-modal").modal("hide");
-					}).error(function(data){
-						$scope.error = data.message;
-					}).finally(function(){
-						$scope.loading = false;
-						
-						$scope.loadCategories();
-					});
-				}
+//				}else{
+//					parentCategory.childCategories.splice(parentCategory.childCategories.indexOf(category), 1);
+//					
+//					$http.post(kubikProductCategories.categoriesUrl, parentCategory).success(function(){
+//						$(".confirm-delete-category-modal").modal("hide");
+//					}).error(function(data){
+//						$scope.error = data.message;
+//					}).finally(function(){
+//						$scope.loading = false;
+//						
+//						$scope.loadCategories();
+//					});
+//				}
 			});
 		}
 		
@@ -150,17 +144,21 @@ window.KubikProductCategories.prototype.init = function(){
 			});
 		};
 		
-		$scope.saveCategory = function(category){
+		$scope.saveCategory = function(category){			
 			$scope.hideError();
 			
-			$http.post(kubikProductCategories.categoriesUrl, $scope.category).success(function(){
+			if(category.parentCategory != undefined && category.parentCategory.id == undefined){
+				category.parentCategory = {id : category.parentCategory};
+			}
+			
+			$http.post(kubikProductCategories.categoriesUrl, category).success(function(){
 				$(".edit-category-modal").modal("hide");
 			}).error(function(data){
 				$scope.error = data.message;
 			}).finally(function(){
 				$scope.loadCategories();
 			});
-		}
+		};
 		
 		$scope.kubikProductCategories = kubikProductCategories;
 		

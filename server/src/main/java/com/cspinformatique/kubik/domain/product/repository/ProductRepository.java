@@ -11,12 +11,14 @@ import com.cspinformatique.kubik.model.product.Category;
 import com.cspinformatique.kubik.model.product.Product;
 import com.cspinformatique.kubik.model.product.Supplier;
 
-public interface ProductRepository extends
-		PagingAndSortingRepository<Product, Integer> {
+public interface ProductRepository extends PagingAndSortingRepository<Product, Integer> {
 	int countByCategory(Category category);
-	
+
 	List<Product> findByCategory(Category category);
-	
+
+	@Query("SELECT product FROM Product product WHERE category is not null")
+	Page<Product> findByCategoryNotNull(Pageable pageable);
+
 	@Query("SELECT id FROM Product WHERE dilicomReference = ?1")
 	List<Integer> findIdByDilicomReference(boolean dilicomReference);
 
@@ -31,7 +33,7 @@ public interface ProductRepository extends
 
 	@Query("SELECT product FROM Product product WHERE category is null ORDER BY RAND()")
 	Page<Product> findRandomWithoutCategory(Pageable pageable);
-	
+
 	@Query("SELECT product FROM Product product WHERE ean13 LIKE ?1 OR extendedLabel LIKE ?1 OR publisher LIKE ?1 OR collection LIKE ?1 OR author LIKE ?1 OR isbn LIKE ?1")
 	Page<Product> search(String query, Pageable pageable);
 }

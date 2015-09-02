@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.cspinformatique.kubik.model.broadleaf.BroadleafNotification;
 import com.cspinformatique.kubik.model.broadleaf.BroadleafNotification.Status;
@@ -14,9 +15,11 @@ public interface BroadleafNotificationService {
 	
 	List<BroadleafNotification> findByStatus(Status status);
 	
+	List<BroadleafNotification> findByStatus(Status status, Sort sort);
+	
 	BroadleafNotification findOne(int id);
 	
-	void process(BroadleafNotification broadleafNotification);
+	<T extends BroadleafNotification> void process(BroadleafNotification broadleafNotification);
 
 	BroadleafNotification save(BroadleafNotification broadleafNotification);
 }

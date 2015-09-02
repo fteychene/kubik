@@ -9,5 +9,7 @@ import com.cspinformatique.kubik.model.product.Category;
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
 	List<Category> findByName(String name);
 	
+	List<Category> findByParentCategory(Category category);
+	
 	List<Category> findByRootCategory(boolean rootCategory);
 }

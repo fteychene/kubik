@@ -12,30 +12,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpMethod;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.cspinformatique.broadleaf.client.BroadleafTemplate;
-import com.cspinformatique.broadleaf.client.model.BlcProduct;
+import com.cspinformatique.kubik.domain.broadleaf.processor.NotificationProcessors;
 import com.cspinformatique.kubik.domain.broadleaf.repository.BroadleafNotificationRepository;
 import com.cspinformatique.kubik.domain.broadleaf.service.BroadleafNotificationService;
-import com.cspinformatique.kubik.domain.product.service.ProductService;
 import com.cspinformatique.kubik.model.broadleaf.BroadleafNotification;
 import com.cspinformatique.kubik.model.broadleaf.BroadleafNotification.Status;
-import com.cspinformatique.kubik.model.product.Product;
 
 @Service
 public class BroadleafNotificationServiceImpl implements BroadleafNotificationService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BroadleafNotificationServiceImpl.class);
 
 	@Autowired
+	private NotificationProcessors notificationProcessors;
+
+	@Autowired
 	private BroadleafNotificationRepository broadleafNotificationRepository;
-
-	@Autowired
-	private BroadleafTemplate broadleafTemplate;
-
-	@Autowired
-	private ProductService productService;
 
 	@Value("{broadleaf.url}")
 	private String broadleafUrl;
@@ -59,21 +53,16 @@ public class BroadleafNotificationServiceImpl implements BroadleafNotificationSe
 	}
 
 	@Override
+	public List<BroadleafNotification> findByStatus(Status status, Sort sort) {
+		return broadleafNotificationRepository.findByStatus(status, sort);
+	}
+
+	@Override
 	@Transactional
 	public void process(BroadleafNotification broadleafNotification) {
 		try {
-			Product product = productService.findOne(broadleafNotification.getProduct().getId());
-
-			BlcProduct blcProduct = broadleafTemplate.exchange("/catalog/product", HttpMethod.POST, product,
-					BlcProduct.class);
-
-			if (product.getBroadleafId() == null) {
-				product.setBroadleafId(blcProduct.getId());
-
-				productService.save(product, true);
-			}
-
-			broadleafNotification.setStatus(Status.PROCESSED);
+			broadleafNotification.setStatus(notificationProcessors.getProcessor(broadleafNotification.getType())
+					.processNotification(broadleafNotification));
 		} catch (Exception ex) {
 			LOGGER.error("Error while processing broadleaf notification " + broadleafNotification.getId() + ".", ex);
 
@@ -103,7 +92,7 @@ public class BroadleafNotificationServiceImpl implements BroadleafNotificationSe
 			}
 
 			return broadleafNotificationRepository.save(broadleafNotification);
-		}else{
+		} else {
 			return broadleafNotification;
 		}
 	}

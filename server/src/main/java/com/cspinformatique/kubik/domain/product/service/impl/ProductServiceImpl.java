@@ -34,6 +34,8 @@ import com.cspinformatique.kubik.domain.sales.service.CustomerCreditDetailServic
 import com.cspinformatique.kubik.domain.sales.service.InvoiceDetailService;
 import com.cspinformatique.kubik.domain.warehouse.service.ProductInventoryService;
 import com.cspinformatique.kubik.model.broadleaf.BroadleafNotification;
+import com.cspinformatique.kubik.model.broadleaf.ProductNotification;
+import com.cspinformatique.kubik.model.broadleaf.BroadleafNotification.Action;
 import com.cspinformatique.kubik.model.product.AvailabilityCode;
 import com.cspinformatique.kubik.model.product.BarcodeType;
 import com.cspinformatique.kubik.model.product.Category;
@@ -180,6 +182,11 @@ public class ProductServiceImpl implements ProductService, InitializingBean {
 	}
 
 	@Override
+	public Page<Product> findByCategoryNotNull(Pageable pageable) {
+		return this.productRepository.findByCategoryNotNull(pageable);
+	}
+
+	@Override
 	public Iterable<Product> findByEan13(String ean13) {
 		return this.productRepository.findByEan13(ean13);
 	}
@@ -207,13 +214,13 @@ public class ProductServiceImpl implements ProductService, InitializingBean {
 	public Product findRandomByCategory(Category category) {
 		Page<Product> result = null;
 		Pageable pageable = new PageRequest(0, 1);
-		
+
 		if (category == null) {
 			result = productRepository.findRandomWithoutCategory(pageable);
 		} else {
 			result = productRepository.findRandomByCategory(category, pageable);
 		}
-		
+
 		if (result.getContent().size() == 0) {
 			return null;
 		}
@@ -306,6 +313,15 @@ public class ProductServiceImpl implements ProductService, InitializingBean {
 	}
 
 	@Override
+	public void resetBroadleafId(int productId) {
+		Product product = findOne(productId);
+
+		product.setBroadleafId(null);
+
+		productRepository.save(product);
+	}
+
+	@Override
 	@Transactional
 	public Product save(Product product, boolean skipBroadleafNotification) {
 		boolean updatePurchaseOrders = false;
@@ -338,9 +354,15 @@ public class ProductServiceImpl implements ProductService, InitializingBean {
 		}
 
 		if (!skipBroadleafNotification) {
-			// Create a broadleaf notification for the product.
-			this.broadleafNotificationService.save(new BroadleafNotification(0, product,
-					BroadleafNotification.Status.TO_PROCESS, null, null, null, null));
+			if (product.getCategory() != null) {
+				// Create a broadleaf notification for the product.
+				this.broadleafNotificationService.save(new ProductNotification(0, Action.UPDATE,
+						BroadleafNotification.Status.TO_PROCESS, null, null, null, null, product));
+			} else {
+				LOGGER.info("Product " + product.getId()
+						+ " would not be notified since the product has no category defined.");
+			}
+
 		}
 
 		return product;

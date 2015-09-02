@@ -16,6 +16,8 @@ public interface ProductService {
 
 	int countByCategory(Category category);
 	
+	Page<Product> findByCategoryNotNull(Pageable pageable);
+	
 	Iterable<Product> findByEan13(String ean13);
 	
 	Product findByEan13AndSupplier(String ean13, Supplier supplier);
@@ -33,6 +35,8 @@ public interface ProductService {
 	Set<String> getProductIdsCache();
 	
 	void mergeProduct(Product sourceProduct, Product targetProduct);
+	
+	void resetBroadleafId(int productId);
 	
 	Product save(Product product);
 	

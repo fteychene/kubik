@@ -8,20 +8,28 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-
-import com.cspinformatique.kubik.model.product.Product;
 
 @Entity
-public class BroadleafNotification {
+@Inheritance
+public abstract class BroadleafNotification {
+	public enum Type {
+		PRODUCT, CATEGORY
+	}
+	
+	public enum Action{
+		UPDATE, DELETE
+	}
+
 	public enum Status {
-		TO_PROCESS, PROCESSED, ERROR
+		TO_PROCESS, PROCESSED, ERROR, SKIPPED
 	}
 
 	private int id;
-	private Product product;
 	private Status status;
+	private Type type;
+	private Action action;
 	private Date creationDate;
 	private Date processedDate;
 	private Date errorDate;
@@ -31,11 +39,12 @@ public class BroadleafNotification {
 
 	}
 
-	public BroadleafNotification(int id, Product product, Status status,
-			Date creationDate, Date processedDate, Date errorDate, String error) {
+	public BroadleafNotification(int id, Status status, Type type, Action action, Date creationDate, Date processedDate,
+			Date errorDate, String error) {
 		this.id = id;
-		this.product = product;
 		this.status = status;
+		this.type = type;
+		this.action = action;
 		this.creationDate = creationDate;
 		this.processedDate = processedDate;
 		this.errorDate = errorDate;
@@ -52,15 +61,6 @@ public class BroadleafNotification {
 		this.id = id;
 	}
 
-	@ManyToOne
-	public Product getProduct() {
-		return product;
-	}
-
-	public void setProduct(Product product) {
-		this.product = product;
-	}
-
 	@Enumerated(EnumType.STRING)
 	public Status getStatus() {
 		return status;
@@ -68,6 +68,24 @@ public class BroadleafNotification {
 
 	public void setStatus(Status status) {
 		this.status = status;
+	}
+
+	@Enumerated(EnumType.STRING)
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+
+	@Enumerated(EnumType.STRING)
+	public Action getAction() {
+		return action;
+	}
+
+	public void setAction(Action action) {
+		this.action = action;
 	}
 
 	public Date getCreationDate() {

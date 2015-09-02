@@ -14,7 +14,7 @@
 	<groupId>com.cspinformatique.kubik</groupId>
 	<artifactId>kubik</artifactId>
 
-	<version>1.7.0</version>
+	<version>1.8.0-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
@@ -24,6 +24,10 @@
 		<module>reports</module>
 		<module>proxy</module>
 	</modules>
+	
+	<properties>
+		<broadleaf-java-client.version>1.1.0-SNAPSHOT</broadleaf-java-client.version>
+	</properties>
 
 	<build>
 		<resources>
@@ -55,4 +59,14 @@
 		<developerConnection>scm:git:https://github.com/daniellavoie/Kubik.git</developerConnection>
 		<tag>kubik-1.4.1</tag>
 	</scm>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.cspinformatique</groupId>
+				<artifactId>broadleaf-java-client</artifactId>
+				<version>${broadleaf-java-client.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>

@@ -29,7 +29,7 @@ public class CategoryController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public void delete(@PathVariable int id) {
-		categoryService.delete(id);
+		categoryService.delete(findOne(id));
 	}
 
 	@ResponseStatus(HttpStatus.NO_CONTENT)
@@ -40,7 +40,7 @@ public class CategoryController {
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody List<Category> findRootCategories() {
-		return categoryService.findByRootCategory(true);
+		return categoryService.findByParentCategory(null);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, params = "page", produces = MediaType.APPLICATION_JSON_VALUE)
