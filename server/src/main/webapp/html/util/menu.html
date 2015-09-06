@@ -6,7 +6,7 @@
 <body>
 	<div th:fragment="menu">
 		<!-- Fixed navbar -->
-		<nav ng-controller="KubikMenuController as menuView" th:attr="class=${'navbar navbar-default navbar-fixed-top navbar-inverse ' + @environment.getProperty('kubik.environment')}">
+		<nav ng-controller="MenuCtrl as menuView" th:attr="class=${'navbar navbar-default navbar-fixed-top navbar-inverse ' + @environment.getProperty('kubik.environment')}">
 			<div class="container">
 <!-- 				<div  -->
 <!-- 					th:if="${@environment.getProperty('kubik.environment') != 'production'}" -->

@@ -9,13 +9,38 @@
 		<title>La Dimension Fantastique - Statistiques produits</title>
 		
 		<link th:replace="util/import :: head">
+		<link rel="stylesheet" type="text/css" th:href="@{/css/product/product-stats.css}" />
 	</head>
 	
-	<body>
+	<body ng-app="KubikProductsStats">
 		<div th:include="util/menu :: menu"></div>
 		
-		<div class="container text-center" ng-cloak ng-app="KubikProductsStats" ng-controller="KubikProductsStatsController as productsStatsView">
+		<div class="container text-center" ng-cloak ng-controller="ProductsStatsCtrl">
 			<h1>Statistiques produits</h1>
+			
+			<div class="row">
+				<div class="col-sm-4 col-sm-offset-2 minDeliveryDate form-group">
+					<label>Depuis :</label>
+					<input 
+						ng-model="startDate" 
+						type="text" 
+						class="date form-control"
+						placeholder="JJ/MM/AAAA"
+						ng-change="loadProductsStats()"
+					/>
+				</div>
+				
+				<div class="col-sm-4 maxDeliveryDate form-group">
+					<label>Jusqu'à :</label>
+					<input 
+						ng-model="endDate"
+						type="text" 
+						class="date form-control"
+						placeholder="JJ/MM/AAAA"
+						ng-change="loadProductsStats()"
+					/>
+				</div>
+			</div>
 			
 			<ul class="pager row text-center">
 				<li class="col-md-2">
@@ -52,7 +77,7 @@
 					<tbody>
 						<tr ng-repeat="productStats in productsStatsPage.content">
 							<td>{{productStats.product.ean13}}</td>
-							<td><a href="#" ng-click="kubikProductCard.openCard(productStats.product)">{{productStats.product.standardLabel}}</a></td>
+							<td><a href="#" ng-click="productStatsCtrl.openProductCard(productStats.product)">{{productStats.product.standardLabel}}</a></td>
 							<td>{{productStats.product.productInventory.quantityOnHand}}</td>
 							<td>{{productStats.quantityOrdered}}</td>
 							<td>{{productStats.quantityReceived}}</td>
@@ -68,6 +93,7 @@
 		<div th:replace="product/product-card :: product-card"></div>
 		
 		<script th:replace="util/import :: scripts"></script>
-		<script type="text/javascript" th:src="@{/js/product/products-stats.js}"></script>
+		<script type="text/javascript" th:src="@{/js/product/product-stats/ProductStats.module.js}"></script>
+		<script type="text/javascript" th:src="@{/js/product/product-stats/ProductStatsCtrl.js}"></script>
 	</body>
 </html>
