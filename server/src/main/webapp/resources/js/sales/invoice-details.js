@@ -1,57 +1,86 @@
-var app = angular.module("KubikInvoiceDetails", []);
-var kubikProductCard = new KubikProductCard({
-	app : app,
-	productUrl : "../product"
-});
+(function(){
+	var invoiceId = window.location.pathname.split("/")[2];
+	
+	angular
+		.module("Kubik")
+		.controller("InvoiceDetailsCtrl", InvoiceDetailsCtrl);
+	
+	function InvoiceDetailsCtrl($scope, $http){
+		var vm = this;
 
-var invoiceId = window.location.pathname.split("/")[2];
-
-app.controller("KubikInvoiceDetailsController", function($scope, $http, $timeout){
-	$scope.changeInvoice = function(invoiceId){
-		location.href = invoiceId;
-	};
-	
-	$scope.confirmRefund = function(){
-		$(".refund-modal").modal();
-	};
-	
-	$scope.loadInvoice = function(){
-		$http.get(invoiceId).success(function(invoice){
-			$scope.invoice = invoice;
-		});
-	};
-	
-	$scope.openReceipt = function(){
-		window.open($scope.invoice.id + "/receipt", "Ticket de caisse", "pdf");
-	}
-	
-	$scope.kubikCustomerCard = new KubikCustomerCard({customerUrl : "../customer", customerSaved : function(){
-		$scope.loadInvoice();
-	}});
-	
-	$scope.printReceipt = function(){
-		$http.post("../invoice/" + $scope.invoice.id + "/receipt?print");
-	};
-	
-	$scope.refund = function(){
-		$scope.invoice.status = {type : "REFUND"};
+		vm.changeInvoice = changeInvoice;
+		vm.confirmRefund = confirmRefund;
+		vm.loadInvoice = loadInvoice;
+		vm.loadNextInvoice = loadNextInvoice;
+		vm.loadPreviousInvoice = loadPreviousInvoice;
+		vm.openCustomerCard = openCustomerCard;
+		vm.openProductCard = openProductCard;
+		vm.openReceipt = openReceipt;
+		vm.printReceipt = printReceipt;
+		vm.refund = refund;
 		
-		$http.post("../invoice", $scope.invoice).success(function(invoice){
-			$scope.invoice = invoice;
+		loadInvoice();
+		loadNextInvoice();
+		loadPreviousInvoice();		
+		
+		$scope.$on("customerSaved", function($event, customer){
+			vm.loadInvoice();
 		});
-	};
-	
-	$http.get("../invoice/" + invoiceId + "/next").success(function(invoiceId){
-		if(invoiceId == "") customerCreditId = null;
-		$scope.nextInvoice = invoiceId;
-	});
-	
-	$http.get("../invoice/" + invoiceId + "/previous").success(function(invoiceId){
-		if(invoiceId == "") customerCreditId = null;
-		$scope.previousInvoice = invoiceId;
-	});
-	
-	$scope.kubikProductCard = kubikProductCard;
-	
-	$scope.loadInvoice();
-});
+		
+		function changeInvoice(invoiceId){
+			location.href = invoiceId;
+		}
+		
+		function confirmRefund(){
+			$(".refund-modal").modal();
+		}
+		
+		function loadInvoice(){
+			$http.get(invoiceId).success(function(invoice){
+				vm.invoice = invoice;
+			});
+		}
+		
+		function loadNextInvoice(){
+			$http.get("../invoice/" + invoiceId + "/next").success(function(nextInvoiceId){
+				if(nextInvoiceId == "") customerCreditId = null;
+				vm.nextInvoice = nextInvoiceId;
+			});
+		}
+		
+		function loadPreviousInvoice(){
+			$http.get("../invoice/" + invoiceId + "/previous").success(function(previousInvoiceId){
+				if(previousInvoiceId == "") customerCreditId = null;
+				vm.previousInvoice = previousInvoiceId;
+			});
+		}
+		
+		function openCustomerCard($event, customer){
+			$event.stopPropagation();
+			
+			$scope.$broadcast("openCustomerCard", customer);
+		}
+		
+		function openProductCard($event, product){
+			$event.stopPropagation();
+			
+			$scope.$broadcast("openProductCard", product);
+		}
+
+		function openReceipt(){
+			window.open(vm.invoice.id + "/receipt", "Ticket de caisse", "pdf");
+		}
+		
+		function printReceipt(){
+			$http.post("../invoice/" + vm.invoice.id + "/receipt?print");
+		}
+		
+		function refund(){
+			vm.invoice.status = {type : "REFUND"};
+			
+			$http.post("../invoice", vm.invoice).success(function(invoice){
+				vm.invoice = invoice;
+			});
+		};
+	}
+})();
